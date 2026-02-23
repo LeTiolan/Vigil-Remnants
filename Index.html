@@ -42,11 +42,9 @@
             transform: translate(-50%, -50%); 
             pointer-events: none;
             z-index: 5;
-            /* Inline SVG for a perfect, single-shape cross */
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d4af37'/%3E%3Cstop offset='100%25' stop-color='%238b6b4a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M9 2 h6 v7 h7 v6 h-7 v7 h-6 v-7 h-7 v-6 h7 z' fill='url(%23g)' stroke='%23292017' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
             background-size: contain;
             background-repeat: no-repeat;
-            /* Drop shadow filter works perfectly on SVGs */
             filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.8));
         }
 
@@ -296,66 +294,80 @@
 
         // --- Items: Spread-Out Orb Placement ---
         const orbs = [];
-        let minOrbDist = 150; 
-        
-        while (orbs.length < totalOrbs) {
-            emptyCells.sort(() => Math.random() - 0.5); 
-            let placed = false;
+        const MIN_DISTANCE_BETWEEN_ORBS = 20; 
+        const SAFE_ZONE_FROM_PLAYER = 20;
+
+        let orbAttempts = 0;
+        while (orbs.length < totalOrbs && orbAttempts < 2000) {
+            orbAttempts++;
+            const cell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            const pos = getPos(cell.x, cell.z);
             
-            for (let cell of emptyCells) {
-                if (cell.x === 1 && cell.z === 1) continue; 
-                
-                const pos = getPos(cell.x, cell.z);
-                let tooClose = false;
-                
-                for (let orb of orbs) {
-                    const dist = Math.hypot(orb.position.x - pos.x, orb.position.z - pos.z);
-                    if (dist < minOrbDist) {
-                        tooClose = true;
-                        break;
-                    }
-                }
-                
-                if (!tooClose) {
-                    const orbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial({ color: 0x00eeff }));
-                    orbMesh.position.set(pos.x, 1.5, pos.z);
-                    scene.add(orbMesh);
-                    orbs.push(orbMesh);
-                    placed = true;
+            // 1. Check distance from Player Start
+            const distFromStart = Math.hypot(pos.x - startPos.x, pos.z - startPos.z);
+            if (distFromStart < SAFE_ZONE_FROM_PLAYER) continue;
+
+            // 2. Check distance from existing Orbs
+            let tooClose = false;
+            for (let existingOrb of orbs) {
+                const dist = Math.hypot(pos.x - existingOrb.position.x, pos.z - existingOrb.position.z);
+                if (dist < MIN_DISTANCE_BETWEEN_ORBS) {
+                    tooClose = true;
                     break;
                 }
             }
-            
-            if (!placed) {
-                minOrbDist *= 0.8;
+
+            if (!tooClose) {
+                const orbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial({ color: 0x00eeff }));
+                orbMesh.position.set(pos.x, 1.5, pos.z);
+                scene.add(orbMesh);
+                orbs.push(orbMesh);
             }
         }
 
-        // --- Enemies: Phantoms ---
+        // --- Enemies: Spaced-Out Phantoms ---
         const enemies = [];
-        const availableForEnemies = emptyCells.filter(c => c.x > 15 && c.z > 15);
-        availableForEnemies.sort(() => Math.random() - 0.5);
-        
+        const MIN_DISTANCE_BETWEEN_ENEMIES = 30;
+        const ENEMY_SAFE_ZONE = 40; // Ensure enemies spawn far from start
+
         const ghostGeo = new THREE.SphereGeometry(1.2, 16, 16);
         const ghostMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.7 });
 
-        for(let i = 0; i < 8; i++) {
-            const eCell = availableForEnemies[i];
+        let enemyAttempts = 0;
+        while (enemies.length < 8 && enemyAttempts < 2000) {
+            enemyAttempts++;
+            const eCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
             const ePos = getPos(eCell.x, eCell.z);
-            
-            const enemy = new THREE.Mesh(ghostGeo, ghostMat);
-            enemy.position.set(ePos.x, 2.0, ePos.z);
-            
-            const pLight = new THREE.PointLight(0xff0000, 2, 20);
-            enemy.add(pLight);
 
-            enemy.userData = {
-                targetPos: new THREE.Vector3(ePos.x, 2.0, ePos.z),
-                lastGrid: {x: eCell.x, z: eCell.z}
-            };
+            // 1. Check distance from Player Start
+            const distFromStart = Math.hypot(ePos.x - startPos.x, ePos.z - startPos.z);
+            if (distFromStart < ENEMY_SAFE_ZONE) continue;
 
-            scene.add(enemy);
-            enemies.push(enemy);
+            // 2. Check distance from other Enemies
+            let tooClose = false;
+            for (let existingEnemy of enemies) {
+                const dist = Math.hypot(ePos.x - existingEnemy.position.x, ePos.z - existingEnemy.position.z);
+                if (dist < MIN_DISTANCE_BETWEEN_ENEMIES) {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose) {
+                const enemy = new THREE.Mesh(ghostGeo, ghostMat);
+                enemy.position.set(ePos.x, 2.0, ePos.z);
+                
+                const pLight = new THREE.PointLight(0xff0000, 2, 20);
+                enemy.add(pLight);
+
+                enemy.userData = {
+                    targetPos: new THREE.Vector3(ePos.x, 2.0, ePos.z),
+                    lastGrid: {x: eCell.x, z: eCell.z}
+                };
+
+                scene.add(enemy);
+                enemies.push(enemy);
+            }
         }
 
         // --- Input & Pause ---
