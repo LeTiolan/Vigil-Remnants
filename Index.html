@@ -183,7 +183,7 @@
         }
 
         // --- Game Logic ---
-        const totalOrbs = 12; 
+        const totalOrbs = 24; 
         let orbsCollected = 0;
         let gameActive = false;
         let gameWon = false;
@@ -249,7 +249,7 @@
         scene.add(hemiLight);
 
         // --- Player Flashlight (SpotLight) ---
-        const flashLight = new THREE.SpotLight(0xffffe6, 35.0, 300, Math.PI / 5, 0.6, 1.0);
+        const flashLight = new THREE.SpotLight(0xffffe6, 55.0, 500, Math.PI / 5, 0.6, 1.0);
         flashLight.position.set(0, 0, 0); 
         
         camera.add(flashLight);
