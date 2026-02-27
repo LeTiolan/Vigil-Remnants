@@ -249,7 +249,7 @@
         scene.add(hemiLight);
 
         // --- Player Flashlight (SpotLight) ---
-        const flashLight = new THREE.SpotLight(0xffffe6, 75.0, 600, Math.PI / 5, 0.6, 0.2);
+        const flashLight = new THREE.SpotLight(0xffffe6, 45.0, 500, Math.PI / 5, 0.6, 1.0);
         flashLight.position.set(0, 0, 0); 
         
         camera.add(flashLight);
