@@ -61,7 +61,7 @@
         .overlay-box {
             background: linear-gradient(135deg, #4a3b2c 0%, #2a2118 100%); border: 6px ridge #7b5e40;
             padding: 40px 60px; box-shadow: 10px 10px 20px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
-            text-align: center; color: #d4c4a8;
+            text-align: center; color: #d4c4a8; position: relative;
         }
 
         #win-screen { 
@@ -79,6 +79,23 @@
 
         h1 { margin-top: 0; text-shadow: 2px 2px 4px #000; border-bottom: 2px solid #5e4835; padding-bottom: 10px;}
         p { text-shadow: 1px 1px 2px #000; line-height: 1.5;}
+
+        /* NEW SETTINGS UI */
+        #cog-btn {
+            position: absolute; top: 15px; right: 15px; width: 40px; height: 40px;
+            background: #5e4835; border: 3px ridge #8b6b4a; color: #d4c4a8;
+            display: none; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer; transition: transform 0.4s; z-index: 12;
+        }
+        #cog-btn:hover { transform: rotate(90deg); color: #fff; }
+
+        .switch-row { margin: 20px 0; display: flex; align-items: center; gap: 20px; font-weight: bold; justify-content: center; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border: 2px solid #5e4835; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: #d4af37; transition: .4s; }
+        input:checked + .slider { background-color: #1a4a1a; }
+        input:checked + .slider:before { transform: translateX(22px); }
     </style>
 </head>
 <body>
@@ -92,6 +109,7 @@
 
     <div id="instructions" class="overlay">
         <div class="overlay-box">
+            <div id="cog-btn">⚙</div>
             <h1 id="main-title">Vigil Remnants</h1>
             <div id="instruction-text">
                 <p>The corridors are wide, but the paths are many.<br>Find the orbs to unlock the perimeter gate.</p>
@@ -99,6 +117,20 @@
                 <p><b>WASD</b>: Move | <b>SHIFT</b>: Sprint</p>
             </div>
             <button id="startBtn">ENGAGE MECHANISM</button>
+        </div>
+    </div>
+
+    <div id="settings-menu" class="overlay" style="display: none; z-index: 11;">
+        <div class="overlay-box">
+            <h1>CALIBRATION</h1>
+            <div class="switch-row">
+                <span>AI HUNTING</span>
+                <label class="switch">
+                    <input type="checkbox" id="aiToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <button id="closeSettingsBtn">BACK TO SYSTEMS</button>
         </div>
     </div>
 
@@ -149,6 +181,7 @@
 
         // --- Game Logic ---
         const totalOrbs = 12; let orbsCollected = 0; let gameActive = false; let gameWon = false;
+        let aiActive = true; let hasStartedOnce = false; 
         let startTime = 0; let accumulatedTime = 0; let hasPlayedSting = false; let prevTime = performance.now(); 
 
         document.getElementById('totalOrbsUI').innerText = totalOrbs;
@@ -220,8 +253,7 @@
             for(let i=-256; i<512; i+=64) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i+32, 0); ctx.lineTo(i+288, 256); ctx.lineTo(i+256, 256); ctx.fill(); }
             const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
         }
-
-        // --- Scene & Lighting ---
+// --- Scene & Lighting ---
         const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0c121a); scene.fog = new THREE.Fog(0x0c121a, 15, 120); 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); camera.rotation.order = 'YXZ';
         
@@ -405,13 +437,46 @@
                 enemy.userData = { targetPos: new THREE.Vector3(ePos.x, 2.0, ePos.z), lastGrid: {x: eCell.x, z: eCell.z} }; scene.add(enemy); enemies.push(enemy);
             }
         }
-
-        // --- Input ---
+// --- Input ---
         const overlay = document.getElementById('instructions'); const startBtn = document.getElementById('startBtn');
+        const cogBtn = document.getElementById('cog-btn');
+        const settingsMenu = document.getElementById('settings-menu');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const aiToggle = document.getElementById('aiToggle');
+
         startBtn.addEventListener('click', () => document.body.requestPointerLock());
+
+        // UI Listeners for Calibration Menu
+        cogBtn.onclick = (e) => {
+            e.stopPropagation();
+            overlay.style.display = 'none';
+            settingsMenu.style.display = 'flex';
+        };
+
+        closeSettingsBtn.onclick = () => {
+            settingsMenu.style.display = 'none';
+            overlay.style.display = 'flex';
+        };
+
+        aiToggle.onchange = (e) => { aiActive = e.target.checked; };
+
         document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === document.body) { overlay.style.display = 'none'; gameActive = true; startTime = Date.now(); prevTime = performance.now(); } 
-            else if (!gameWon) { overlay.style.display = 'flex'; document.getElementById('main-title').innerText = "MECHANISM PAUSED"; startBtn.innerText = "RESUME"; gameActive = false; accumulatedTime += (Date.now() - startTime) / 1000; }
+            if (document.pointerLockElement === document.body) { 
+                overlay.style.display = 'none'; 
+                settingsMenu.style.display = 'none'; // Ensure settings close on resume
+                gameActive = true; 
+                hasStartedOnce = true;
+                startTime = Date.now(); 
+                prevTime = performance.now(); 
+            } 
+            else if (!gameWon) { 
+                overlay.style.display = 'flex'; 
+                document.getElementById('main-title').innerText = "SYSTEM PAUSED"; 
+                startBtn.innerText = "RESUME"; 
+                if (hasStartedOnce) cogBtn.style.display = 'flex'; // Show cog only after initial start
+                gameActive = false; 
+                accumulatedTime += (Date.now() - startTime) / 1000; 
+            }
         });
         document.addEventListener('mousemove', (e) => {
             if (document.pointerLockElement === document.body) {
@@ -520,21 +585,28 @@
             let closestDist = 100;
             enemies.forEach((enemy, index) => {
                 drawBlip(enemy.position.x, enemy.position.z, '#ff5555', 3, false);
-                if (!gameWon && enemy.position.distanceTo(enemy.userData.targetPos) < 0.5) {
-                    const cx = Math.round(enemy.userData.targetPos.x / TILE_SIZE) + Math.floor(MAZE_SIZE / 2); const cz = Math.round(enemy.userData.targetPos.z / TILE_SIZE) + Math.floor(MAZE_SIZE / 2);
-                    const neighbors = []; const dirs = [[0,-1], [0,1], [-1,0], [1,0]];
-                    dirs.forEach(([dx, dz]) => { const nx = cx + dx; const nz = cz + dz; if (nx >= 0 && nx < MAZE_SIZE && nz >= 0 && nz < MAZE_SIZE && maze[nx][nz] === 0) { if (!(nx === enemy.userData.lastGrid.x && nz === enemy.userData.lastGrid.z)) neighbors.push({x: nx, z: nz}); } });
-                    if (neighbors.length === 0 && maze[enemy.userData.lastGrid.x][enemy.userData.lastGrid.z] === 0) neighbors.push(enemy.userData.lastGrid);
-                    enemy.userData.lastGrid = {x: cx, z: cz}; let nextCell = neighbors.length > 0 ? neighbors[Math.floor(Math.random() * neighbors.length)] : enemy.userData.lastGrid;
-                    enemy.userData.targetPos.set(getPos(nextCell.x, nextCell.z).x, 2.0, getPos(nextCell.x, nextCell.z).z);
+                
+                // CONDITIONAL AI MOVEMENT
+                if (aiActive) {
+                    if (!gameWon && enemy.position.distanceTo(enemy.userData.targetPos) < 0.5) {
+                        const cx = Math.round(enemy.userData.targetPos.x / TILE_SIZE) + Math.floor(MAZE_SIZE / 2); const cz = Math.round(enemy.userData.targetPos.z / TILE_SIZE) + Math.floor(MAZE_SIZE / 2);
+                        const neighbors = []; const dirs = [[0,-1], [0,1], [-1,0], [1,0]];
+                        dirs.forEach(([dx, dz]) => { const nx = cx + dx; const nz = cz + dz; if (nx >= 0 && nx < MAZE_SIZE && nz >= 0 && nz < MAZE_SIZE && maze[nx][nz] === 0) { if (!(nx === enemy.userData.lastGrid.x && nz === enemy.userData.lastGrid.z)) neighbors.push({x: nx, z: nz}); } });
+                        if (neighbors.length === 0 && maze[enemy.userData.lastGrid.x][enemy.userData.lastGrid.z] === 0) neighbors.push(enemy.userData.lastGrid);
+                        enemy.userData.lastGrid = {x: cx, z: cz}; let nextCell = neighbors.length > 0 ? neighbors[Math.floor(Math.random() * neighbors.length)] : enemy.userData.lastGrid;
+                        enemy.userData.targetPos.set(getPos(nextCell.x, nextCell.z).x, 2.0, getPos(nextCell.x, nextCell.z).z);
+                    }
+                    const dir = new THREE.Vector3().subVectors(enemy.userData.targetPos, enemy.position).normalize(); enemy.position.addScaledVector(dir, 0.12); enemy.position.y = 2.0 + Math.sin(now * 0.003 + index) * 0.4;
                 }
-                const dir = new THREE.Vector3().subVectors(enemy.userData.targetPos, enemy.position).normalize(); enemy.position.addScaledVector(dir, 0.12); enemy.position.y = 2.0 + Math.sin(now * 0.003 + index) * 0.4;
+                
                 const dist = camera.position.distanceTo(enemy.position); if (dist < closestDist) closestDist = dist;
                 
-                if (!gameWon && dist < 3.0) { document.exitPointerLock(); alert("A PHANTOM CAUGHT YOU."); location.reload(); }
+                // CONDITIONAL GAME OVER COLLISION
+                if (aiActive && !gameWon && dist < 3.0) { document.exitPointerLock(); alert("A PHANTOM CAUGHT YOU."); location.reload(); }
             });
 
-            if (!gameWon && closestDist < 12) { camera.position.x += (Math.random() - 0.5) * ((12 - closestDist) * 0.02); if (!hasPlayedSting) { playSting(); hasPlayedSting = true; } } else { hasPlayedSting = false; }
+            // Heartbeat audio sting when an active enemy is near
+            if (aiActive && !gameWon && closestDist < 12) { camera.position.x += (Math.random() - 0.5) * ((12 - closestDist) * 0.02); if (!hasPlayedSting) { playSting(); hasPlayedSting = true; } } else { hasPlayedSting = false; }
 
             orbs.forEach(orb => {
                 if (!gameWon && orb.position.y > 0 && camera.position.distanceTo(orb.position) < 3) {
