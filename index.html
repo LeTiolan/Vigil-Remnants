@@ -2,16 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vigil Remnants - Final Mechanical</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vigil Remnants - Cinematic Fade</title>
     <style>
-        /* --- ORIGINAL GAME HUD STYLES --- */
         body { margin: 0; overflow: hidden; background-color: #0c121a; font-family: 'Courier New', Courier, monospace; }
         
         .clunky-panel {
             background: linear-gradient(135deg, #5e4835 0%, #3e2e21 50%, #292017 100%);
-            border: 4px ridge #8b6b4a; color: #d4c4a8; text-shadow: 1px 1px 2px #000;
+            border: 4px ridge #8b6b4a;
+            color: #d4c4a8;
+            text-shadow: 1px 1px 2px #000;
             box-shadow: 4px 4px 10px rgba(0,0,0,0.8), inset 2px 2px 5px rgba(255,255,255,0.05);
-            padding: 8px 15px; border-radius: 2px;
+            padding: 8px 15px;
+            border-radius: 2px;
         }
 
         #ui { position: absolute; top: 20px; left: 20px; font-size: 22px; pointer-events: none; z-index: 5;}
@@ -19,11 +22,13 @@
         
         #stamina-container { 
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            width: 300px; height: 18px; background: #1a1511; border: 4px ridge #5e4835; z-index: 5;
+            width: 300px; height: 18px; 
+            background: #1a1511; border: 4px ridge #5e4835; z-index: 5;
             box-shadow: 4px 4px 10px rgba(0,0,0,0.8), inset 0 0 10px #000;
         }
         #stamina-bar { 
-            width: 100%; height: 100%; background: linear-gradient(to bottom, #d4af37, #997a00); 
+            width: 100%; height: 100%; 
+            background: linear-gradient(to bottom, #d4af37, #997a00); 
             transition: background 0.2s, width 0.1s linear; 
         }
         
@@ -40,145 +45,78 @@
             border: 8px ridge #6b533d; border-radius: 50%; z-index: 5;
             box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.9), inset 0 0 15px #000; pointer-events: none;
         }
-
+        
+        /* Cinematic Fade Overlays */
         #fade-black {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000; z-index: 8; opacity: 0; pointer-events: none;
             transition: opacity 3s ease-in-out;
         }
 
+        .overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(10, 8, 5, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; 
+        }
+
+        .overlay-box {
+            background: linear-gradient(135deg, #4a3b2c 0%, #2a2118 100%); border: 6px ridge #7b5e40;
+            padding: 40px 60px; box-shadow: 10px 10px 20px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
+            text-align: center; color: #d4c4a8;
+        }
+
         #win-screen { 
             display: none; background: transparent; opacity: 0; 
             transition: opacity 3s ease-in-out; z-index: 9;
         }
-
-        /* --- YOUR FINAL MECHANICAL MENU STYLES --- */
-        :root {
-            --title-font: 'Courier New', monospace; 
-            --main-font: 'Courier New', monospace;
-            --clunky-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect x='12' y='12' width='8' height='12' fill='%233e2e21' stroke='%23110d0a' stroke-width='1'/%3E%3Cpath d='M16 2 L20 12 L12 12 Z' fill='%238b6b4a' stroke='%23110d0a'/%3E%3Crect x='10' y='24' width='12' height='4' rx='1' fill='%235e4835'/%3E%3Ccircle cx='16' cy='26' r='1' fill='%2300eeff'/%3E%3C/svg%3E") 16 2, auto;
+        
+        button { 
+            background: linear-gradient(to bottom, #6b533d, #3e2e21); color: #e0d8c0; border: 4px outset #8b6b4a; 
+            padding: 15px 30px; font-size: 1.2em; cursor: pointer; font-family: inherit; margin-top: 25px; 
+            text-transform: uppercase; font-weight: bold; text-shadow: 1px 1px 2px #000; box-shadow: 3px 3px 8px rgba(0,0,0,0.6);
         }
+        button:hover { background: linear-gradient(to bottom, #7b634d, #4e3e31); }
+        button:active { border-style: inset; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); transform: translateY(2px); }
 
+        h1 { margin-top: 0; text-shadow: 2px 2px 4px #000; border-bottom: 2px solid #5e4835; padding-bottom: 10px;}
+        p { text-shadow: 1px 1px 2px #000; line-height: 1.5;}
+    </style>
+</head>
+<body>
+    <div id="ui" class="clunky-panel">ORBS: <span id="orbCount">0</span> / <span id="totalOrbsUI">0</span></div>
+    <div id="timer-ui" class="clunky-panel">TIME: <span id="timeVal">0.0</span>s</div>
+    <div id="stamina-container"><div id="stamina-bar"></div></div>
+    <div id="crosshair"></div>
+    <canvas id="radar" width="160" height="160"></canvas>
 
-        // Note: The audio context here is specifically for your menu UI sounds
-        const menuAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const soundLibrary = {};
+    <div id="fade-black"></div>
 
-        // 1. ASSET LOADER
-        async function initSounds() {
-            const files = {
-                clack: 'type_sound.wav',      
-                engage: 'impact.wav',         
-                ambient: 'background.wav'     
-            };
+    <div id="instructions" class="overlay">
+        <div class="overlay-box">
+            <h1 id="main-title">Vigil Remnants</h1>
+            <div id="instruction-text">
+                <p>The corridors are wide, but the paths are many.<br>Find the orbs to unlock the perimeter gate.</p>
+                <p>Check your radar for directions and <span style="color:#ff5555; font-weight:bold;">roaming threats</span>.</p>
+                <p><b>WASD</b>: Move | <b>SHIFT</b>: Sprint</p>
+            </div>
+            <button id="startBtn">ENGAGE MECHANISM</button>
+        </div>
+    </div>
 
-            for (const [name, path] of Object.entries(files)) {
-                try {
-                    const response = await fetch(path);
-                    const arrayBuffer = await response.arrayBuffer();
-                    soundLibrary[name] = await menuAudioCtx.decodeAudioData(arrayBuffer);
-                } catch(e) { console.log("Sound file not found: " + path); }
-            }
-        }
-        initSounds();
-
-        // 2. REFINED PLAY FUNCTION
-        function play(name, options = { loop: false, volume: 1, fadeIn: 0 }) {
-            if (!soundLibrary[name]) return null;
-
-            const source = menuAudioCtx.createBufferSource();
-            source.buffer = soundLibrary[name];
-            source.loop = options.loop;
-
-            const gainNode = menuAudioCtx.createGain();
-            if (options.fadeIn > 0) {
-                gainNode.gain.setValueAtTime(0.001, menuAudioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(options.volume, menuAudioCtx.currentTime + options.fadeIn);
-            } else {
-                gainNode.gain.setValueAtTime(options.volume, menuAudioCtx.currentTime);
-            }
-
-            source.connect(gainNode);
-            gainNode.connect(menuAudioCtx.destination);
-            source.start(0);
-            return { source, gainNode };
-        }
-
-        // --- Interaction Logic ---
-        const nameInput = document.getElementById('name-input');
-        const bgText = document.getElementById('input-bg-text');
-        const uiContainer = document.getElementById('main-ui');
-        const engageBtn = document.getElementById('engage-btn');
-
-        let bgMusic = null;
-
-        engageBtn.addEventListener('mousedown', () => {
-            // Start Music with 3s Fade-In on first click
-            if (!bgMusic) {
-                bgMusic = play('ambient', { loop: true, volume: 0.5, fadeIn: 3 });
-            }
-            
-            play('engage', { volume: 1.2 });
-            uiContainer.classList.remove('shake-active');
-            void uiContainer.offsetWidth; 
-            uiContainer.classList.add('shake-active');
-
-            // --- THE ONLY ADDITION: This triggers the 3D Game ---
-            document.body.requestPointerLock();
-        });
-
-        nameInput.addEventListener('input', () => {
-            play('clack', { volume: 1.2 }); // 2x Loud Typing Tone
-            if (nameInput.value.length > 0) {
-                bgText.style.opacity = "0";
-            } else {
-                bgText.style.opacity = "1";
-                bgText.innerHTML = '<div class="dots"><span>.</span><span>.</span><span>.</span></div>';
-            }
-        });
-
-        nameInput.addEventListener('focus', () => {
-            if (nameInput.value === "") {
-                bgText.innerHTML = '<div class="dots"><span>.</span><span>.</span><span>.</span></div>';
-            }
-        });
-
-        const quotes = ["The corridors are wide, but the paths are many.", "Do not trust the geometry.", "Cyan light is a guide."];
-        document.getElementById('lore-text').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
-    </script>
+    <div id="win-screen" class="overlay">
+        <div class="overlay-box">
+            <h1 style="color: #77ff77;">ESCAPED</h1>
+            <p>You have breached the outer wall.</p>
+            <h2 id="finalTime">TIME: 0.0s</h2>
+            <button onclick="location.reload()">RECALIBRATE & RESTART</button>
+        </div>
+    </div>
 
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
-
-        // --- Game State Variables ---
-        let gameActive = false;
-        let gameWon = false;
-        let startTime = 0;
-        let totalElapsed = 0;
-        let totalOrbs = 10;
-        let orbsCollected = 0;
-        
-        document.getElementById('totalOrbsUI').innerText = totalOrbs;
-
-        const player = {
-            height: 2.1, speed: 0.2, runSpeed: 0.4,
-            stamina: 100, maxStamina: 100, isExhausted: false,
-            radius: 0.8,
-            headBobTimer: 0
-        };
-
-        const keys = { w: false, a: false, s: false, d: false, shift: false };
-        let yaw = Math.PI;
-        let pitch = 0;
-     const SENSITIVITY = 0.002;
 
         // --- Maze Generation ---
         const MAZE_SIZE = 25; const TILE_SIZE = 12; 
@@ -211,7 +149,6 @@
 
         // --- Game Logic ---
         const totalOrbs = 12; let orbsCollected = 0; let gameActive = false; let gameWon = false;
-        let aiActive = true; let hasStartedOnce = false; 
         let startTime = 0; let accumulatedTime = 0; let hasPlayedSting = false; let prevTime = performance.now(); 
 
         document.getElementById('totalOrbsUI').innerText = totalOrbs;
@@ -283,7 +220,8 @@
             for(let i=-256; i<512; i+=64) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i+32, 0); ctx.lineTo(i+288, 256); ctx.lineTo(i+256, 256); ctx.fill(); }
             const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
         }
-// --- Scene & Lighting ---
+
+        // --- Scene & Lighting ---
         const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0c121a); scene.fog = new THREE.Fog(0x0c121a, 15, 120); 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); camera.rotation.order = 'YXZ';
         
@@ -468,67 +406,19 @@
             }
         }
 
-
-        // 2. THE COG/SETTINGS BUTTON
-        cogBtn.onclick = (e) => {
-            e.stopPropagation();
-            // This hides the WASD keys so the Settings can fit
-            document.getElementById('controls-view').style.display = 'none';
-            settingsMenu.style.display = 'flex';
-        };
-
-        // 3. THE CLOSE SETTINGS BUTTON
-        closeSettingsBtn.onclick = () => {
-            settingsMenu.style.display = 'none';
-            document.getElementById('controls-view').style.display = 'block';
-        };
-
-        if (aiToggle) {
-            aiToggle.onchange = (e) => { aiActive = e.target.checked; };
-        }
-// --- THE NEW MASTER SWITCH ---
+        // --- Input ---
+        const overlay = document.getElementById('instructions'); const startBtn = document.getElementById('startBtn');
+        startBtn.addEventListener('click', () => document.body.requestPointerLock());
         document.addEventListener('pointerlockchange', () => {
-            const newUI = document.getElementById('main-ui'); 
-            const newBtn = document.getElementById('engage-btn');
-
-            if (document.pointerLockElement === document.body) { 
-                // GAME START: Hide the new menu
-                if (newUI) newUI.classList.add('hidden'); 
-                document.body.classList.add('game-active');
-                
-                // Keep the game's internal clock running
-                gameActive = true; 
-                hasStartedOnce = true;
-                startTime = Date.now(); 
-                prevTime = performance.now(); 
-                
-            } else if (!gameWon) {
-                // UNLOCK (ESC pressed): Show the NEW menu, change text to PAUSED
-                if (newUI) newUI.classList.remove('hidden');
-                document.body.classList.remove('game-active');
-                
-                const titleEl = document.querySelector('#main-ui h1');
-                if (titleEl) titleEl.innerText = "SYSTEM PAUSED";
-                if (newBtn) newBtn.innerText = "RESUME";
-                
-                // Pause the game clock
-                gameActive = false;
-                if (startTime > 0) {
-                    accumulatedTime += (Date.now() - startTime) / 1000;
-                }
-            }
+            if (document.pointerLockElement === document.body) { overlay.style.display = 'none'; gameActive = true; startTime = Date.now(); prevTime = performance.now(); } 
+            else if (!gameWon) { overlay.style.display = 'flex'; document.getElementById('main-title').innerText = "MECHANISM PAUSED"; startBtn.innerText = "RESUME"; gameActive = false; accumulatedTime += (Date.now() - startTime) / 1000; }
         });
         document.addEventListener('mousemove', (e) => {
             if (document.pointerLockElement === document.body) {
-                yaw -= e.movementX * SENSITIVITY; 
-                pitch -= e.movementY * SENSITIVITY; 
-                pitch = Math.max(-1.57, Math.min(1.57, pitch)); 
-                camera.rotation.set(pitch, yaw, 0);
+                yaw -= e.movementX * SENSITIVITY; pitch -= e.movementY * SENSITIVITY; pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch)); camera.rotation.set(pitch, yaw, 0);
             }
         });
-
-        document.addEventListener('keydown', (e) => keys[e.code] = true); 
-        document.addEventListener('keyup', (e) => keys[e.code] = false);
+        document.addEventListener('keydown', (e) => keys[e.code] = true); document.addEventListener('keyup', (e) => keys[e.code] = false);
 
         // --- Collision Check ---
         function isWall(x, z, radius) {
@@ -630,28 +520,21 @@
             let closestDist = 100;
             enemies.forEach((enemy, index) => {
                 drawBlip(enemy.position.x, enemy.position.z, '#ff5555', 3, false);
-                
-                // CONDITIONAL AI MOVEMENT
-                if (aiActive) {
-                    if (!gameWon && enemy.position.distanceTo(enemy.userData.targetPos) < 0.5) {
-                        const cx = Math.round(enemy.userData.targetPos.x / TILE_SIZE) + Math.floor(MAZE_SIZE / 2); const cz = Math.round(enemy.userData.targetPos.z / TILE_SIZE) + Math.floor(MAZE_SIZE / 2);
-                        const neighbors = []; const dirs = [[0,-1], [0,1], [-1,0], [1,0]];
-                        dirs.forEach(([dx, dz]) => { const nx = cx + dx; const nz = cz + dz; if (nx >= 0 && nx < MAZE_SIZE && nz >= 0 && nz < MAZE_SIZE && maze[nx][nz] === 0) { if (!(nx === enemy.userData.lastGrid.x && nz === enemy.userData.lastGrid.z)) neighbors.push({x: nx, z: nz}); } });
-                        if (neighbors.length === 0 && maze[enemy.userData.lastGrid.x][enemy.userData.lastGrid.z] === 0) neighbors.push(enemy.userData.lastGrid);
-                        enemy.userData.lastGrid = {x: cx, z: cz}; let nextCell = neighbors.length > 0 ? neighbors[Math.floor(Math.random() * neighbors.length)] : enemy.userData.lastGrid;
-                        enemy.userData.targetPos.set(getPos(nextCell.x, nextCell.z).x, 2.0, getPos(nextCell.x, nextCell.z).z);
-                    }
-                    const dir = new THREE.Vector3().subVectors(enemy.userData.targetPos, enemy.position).normalize(); enemy.position.addScaledVector(dir, 0.12); enemy.position.y = 2.0 + Math.sin(now * 0.003 + index) * 0.4;
+                if (!gameWon && enemy.position.distanceTo(enemy.userData.targetPos) < 0.5) {
+                    const cx = Math.round(enemy.userData.targetPos.x / TILE_SIZE) + Math.floor(MAZE_SIZE / 2); const cz = Math.round(enemy.userData.targetPos.z / TILE_SIZE) + Math.floor(MAZE_SIZE / 2);
+                    const neighbors = []; const dirs = [[0,-1], [0,1], [-1,0], [1,0]];
+                    dirs.forEach(([dx, dz]) => { const nx = cx + dx; const nz = cz + dz; if (nx >= 0 && nx < MAZE_SIZE && nz >= 0 && nz < MAZE_SIZE && maze[nx][nz] === 0) { if (!(nx === enemy.userData.lastGrid.x && nz === enemy.userData.lastGrid.z)) neighbors.push({x: nx, z: nz}); } });
+                    if (neighbors.length === 0 && maze[enemy.userData.lastGrid.x][enemy.userData.lastGrid.z] === 0) neighbors.push(enemy.userData.lastGrid);
+                    enemy.userData.lastGrid = {x: cx, z: cz}; let nextCell = neighbors.length > 0 ? neighbors[Math.floor(Math.random() * neighbors.length)] : enemy.userData.lastGrid;
+                    enemy.userData.targetPos.set(getPos(nextCell.x, nextCell.z).x, 2.0, getPos(nextCell.x, nextCell.z).z);
                 }
-                
+                const dir = new THREE.Vector3().subVectors(enemy.userData.targetPos, enemy.position).normalize(); enemy.position.addScaledVector(dir, 0.12); enemy.position.y = 2.0 + Math.sin(now * 0.003 + index) * 0.4;
                 const dist = camera.position.distanceTo(enemy.position); if (dist < closestDist) closestDist = dist;
                 
-                // CONDITIONAL GAME OVER COLLISION
-                if (aiActive && !gameWon && dist < 3.0) { document.exitPointerLock(); alert("A PHANTOM CAUGHT YOU."); location.reload(); }
+                if (!gameWon && dist < 3.0) { document.exitPointerLock(); alert("A PHANTOM CAUGHT YOU."); location.reload(); }
             });
 
-            // Heartbeat audio sting when an active enemy is near
-            if (aiActive && !gameWon && closestDist < 12) { camera.position.x += (Math.random() - 0.5) * ((12 - closestDist) * 0.02); if (!hasPlayedSting) { playSting(); hasPlayedSting = true; } } else { hasPlayedSting = false; }
+            if (!gameWon && closestDist < 12) { camera.position.x += (Math.random() - 0.5) * ((12 - closestDist) * 0.02); if (!hasPlayedSting) { playSting(); hasPlayedSting = true; } } else { hasPlayedSting = false; }
 
             orbs.forEach(orb => {
                 if (!gameWon && orb.position.y > 0 && camera.position.distanceTo(orb.position) < 3) {
@@ -763,17 +646,5 @@
         function animate() { requestAnimationFrame(animate); update(); renderer.render(scene, camera); } animate();
         window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     </script>
-    <script type="text/javascript">
-    var sc_project=13209485; 
-    var sc_invisible=1; 
-    var sc_security="cd04d674"; 
-    var scJsHost = "https://";
-    document.write("<sc"+"ript type='text/javascript' src='" + scJsHost+
-    "statcounter.com/counter/counter.js'></"+"script>");
-    </script>
-    <noscript><div class="statcounter"><a title="Web Analytics"
-    href="https://statcounter.com/" target="_blank"><img class="statcounter"
-    src="https://c.statcounter.com/13209485/0/cd04d674/0/" alt="Web Analytics"
-    referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 </body>
 </html>
