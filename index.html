@@ -81,13 +81,13 @@
             transition: opacity 0.5s ease, visibility 0.5s; /* Smooth fade effect */
         }
 
-        /* This is the "Kill Switch" class for the menu */
+      /* This is the "Kill Switch" class for the menu */
         .overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none; /* Allows clicks to pass through to the game */
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important; /* Allows clicks to pass through to the game */
+            transition: opacity 0.5s ease; /* Makes it fade out smoothly */
         }
-
         .grid-container {
             display: grid; grid-template-columns: 300px minmax(400px, 600px) 300px; gap: 25px;
             animation: slam 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards; 
@@ -184,22 +184,29 @@
 
     <div id="instructions" class="overlay">
         <div class="grid-container" id="main-ui">
-            <div class="left-col">
+          <div class="left-col">
                 <div class="checklist">
                     <u style="text-decoration-thickness: 2px;">OBJECTIVES</u><br><br>
                     [ ] EXTRACT ORBS<br>
                     [ ] MONITOR STAMINA<br>
                     [ ] FIND THE BREACH
                 </div>
-                <div class="panel" style="margin-top: 20px;">
-                    <div class="header-title">SETTINGS</div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
-                        <div></div><div class="key" style="text-align:center">W</div><div></div>
-                        <div class="key" style="text-align:center">A</div><div class="key" style="text-align:center">S</div><div class="key" style="text-align:center">D</div>
+                <div class="panel" id="settings-panel" style="margin-top: 20px;">
+                    <div class="header-title">SETTINGS <span id="cog-btn" style="cursor:pointer; float:right; font-size: 0.8em;">⚙️</span></div>
+                    
+                    <div id="settings-menu" style="display: none; flex-direction: column; gap: 10px; margin-top: 10px;">
+                         <div class="setting-row">AUDIO UNIT <input type="checkbox" id="aiToggle" checked></div>
+                         <div class="setting-row">SHADOW GEN <input type="checkbox" checked></div>
+                         <button id="closeSettingsBtn" class="clunky-panel" style="cursor:pointer; margin-top:10px;">CLOSE</button>
                     </div>
-                    <div class="setting-row">AUDIO UNIT <input type="checkbox" checked></div>
-                    <div class="setting-row">SHADOW GEN <input type="checkbox" checked></div>
-                    <div class="setting-row">SENSITIVITY <input type="range" style="width: 100px;"></div>
+
+                    <div id="controls-view">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+                            <div></div><div class="key" style="text-align:center">W</div><div></div>
+                            <div class="key" style="text-align:center">A</div><div class="key" style="text-align:center">S</div><div class="key" style="text-align:center">D</div>
+                        </div>
+                        <div class="setting-row">SENSITIVITY <input type="range" style="width: 100px;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -357,13 +364,28 @@
         const keys = { w: false, a: false, s: false, d: false, shift: false };
         let yaw = Math.PI;
         let pitch = 0;
-        const SENSITIVITY = 0.002;
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-    </script>
+     const SENSITIVITY = 0.002;
 
-    <script type="module">
-        import * as THREE from 'three';
+        // --- Input ---
+        const overlay = document.getElementById('instructions'); 
+        const startBtn = document.getElementById('engage-btn'); 
+        const cogBtn = document.getElementById('cog-btn');
+        const settingsMenu = document.getElementById('settings-menu');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const aiToggle = document.getElementById('aiToggle');
+        // --- BUTTON IGNITION ---
+        startBtn.onclick = () => {
+            // This locks the mouse so you can control the camera
+            document.body.requestPointerLock();
+            
+            // This hides the menu so you can see the game
+            overlay.classList.add('hidden'); 
+            overlay.style.display = 'none'; 
+            
+            // This starts the game logic
+            gameActive = true;
+            startTime = Date.now();
+        };
 
         // --- Maze Generation ---
         const MAZE_SIZE = 25; const TILE_SIZE = 12; 
@@ -652,52 +674,65 @@
                 enemy.userData = { targetPos: new THREE.Vector3(ePos.x, 2.0, ePos.z), lastGrid: {x: eCell.x, z: eCell.z} }; scene.add(enemy); enemies.push(enemy);
             }
         }
-    // --- Input ---
-const overlay = document.getElementById('instructions'); 
-// This points the variable to your new "ENGAGE" button ID
-const startBtn = document.getElementById('engage-btn'); 
-const cogBtn = document.getElementById('cog-btn');
+  // --- Input ---
+        const overlay = document.getElementById('instructions'); 
+        const startBtn = document.getElementById('engage-btn'); 
+        const cogBtn = document.getElementById('cog-btn');
         const settingsMenu = document.getElementById('settings-menu');
-const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const aiToggle = document.getElementById('aiToggle'); 
 
-   startBtn.addEventListener('click', () => document.body.requestPointerLock());
-      // UI Listeners for Calibration Menu
+        // 1. THE START BUTTON
+        startBtn.onclick = () => {
+            document.body.requestPointerLock();
+        };
+
+        // 2. THE COG/SETTINGS BUTTON
         cogBtn.onclick = (e) => {
             e.stopPropagation();
-            overlay.classList.add('hidden'); // Use hidden class
+            // This hides the WASD keys so the Settings can fit
+            document.getElementById('controls-view').style.display = 'none';
             settingsMenu.style.display = 'flex';
         };
 
+        // 3. THE CLOSE SETTINGS BUTTON
         closeSettingsBtn.onclick = () => {
             settingsMenu.style.display = 'none';
-            overlay.classList.remove('hidden'); // Remove hidden class
+            document.getElementById('controls-view').style.display = 'block';
         };
 
-        aiToggle.onchange = (e) => { aiActive = e.target.checked; };
+        if (aiToggle) {
+            aiToggle.onchange = (e) => { aiActive = e.target.checked; };
+        }
 
+        // 4. THE MASTER SWITCH (Pointer Lock)
         document.addEventListener('pointerlockchange', () => {
             if (document.pointerLockElement === document.body) { 
-                // --- THE FIX: Hides the entire mechanical menu ---
+                // GAME START: Hide everything
+                overlay.style.display = 'none'; 
                 overlay.classList.add('hidden'); 
-                
                 settingsMenu.style.display = 'none'; 
+                
                 gameActive = true; 
                 hasStartedOnce = true;
                 startTime = Date.now(); 
                 prevTime = performance.now(); 
             } 
             else if (!gameWon) { 
-                // --- THE FIX: Shows the menu when Paused ---
+                // GAME PAUSED: Show menu
+                overlay.style.display = 'flex'; 
                 overlay.classList.remove('hidden'); 
                 
                 document.getElementById('main-title').innerText = "SYSTEM PAUSED"; 
                 startBtn.innerText = "RESUME"; 
+                
                 if (hasStartedOnce) cogBtn.style.display = 'flex';
                 gameActive = false; 
-                accumulatedTime += (Date.now() - startTime) / 1000; 
+                if (startTime > 0) {
+                    accumulatedTime += (Date.now() - startTime) / 1000;
+                }
             }
         });
-
         document.addEventListener('mousemove', (e) => {
             if (document.pointerLockElement === document.body) {
                 yaw -= e.movementX * SENSITIVITY; 
