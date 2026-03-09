@@ -499,14 +499,23 @@
             }
         }
 
-        // Nametag typing effects
+      // Nametag typing effects & Event Shielding
         nameInput.addEventListener('focus', () => { if (nameInput.value === "") { bgText.innerHTML = '<div class="dots"><span>.</span><span>.</span><span>.</span></div>'; bgText.style.opacity = "1"; } });
         nameInput.addEventListener('blur', () => { if (nameInput.value === "") { bgText.innerHTML = 'NAMETAG'; bgText.style.opacity = "1"; } });
-        nameInput.addEventListener('input', () => {
+        
+        nameInput.addEventListener('input', (e) => {
             playUISound(90, 1.2, 0.25, 'triangle'); 
+            
+            // YOUR IDEA: Force uppercase and strip out numbers/symbols/spaces
+            e.target.value = e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase();
+
             if (nameInput.value.length > 0) bgText.style.opacity = "0";
             else { bgText.style.opacity = "1"; bgText.innerHTML = '<div class="dots"><span>.</span><span>.</span><span>.</span></div>'; }
         });
+
+        // THE FIX: Build a soundproof wall so the game engine can't hear you type WASD
+        nameInput.addEventListener('keydown', (e) => e.stopPropagation());
+        nameInput.addEventListener('keyup', (e) => e.stopPropagation());
 
         // Hover & Thunk sounds
         document.querySelectorAll('#main-ui button, #main-ui input').forEach(el => {
