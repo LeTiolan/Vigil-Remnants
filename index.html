@@ -2,19 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vigil Remnants - Cinematic Fade</title>
+    <title>Vigil Remnants - Final Mechanical</title>
     <style>
+        /* --- ORIGINAL GAME HUD STYLES --- */
         body { margin: 0; overflow: hidden; background-color: #0c121a; font-family: 'Courier New', Courier, monospace; }
         
         .clunky-panel {
             background: linear-gradient(135deg, #5e4835 0%, #3e2e21 50%, #292017 100%);
-            border: 4px ridge #8b6b4a;
-            color: #d4c4a8;
-            text-shadow: 1px 1px 2px #000;
+            border: 4px ridge #8b6b4a; color: #d4c4a8; text-shadow: 1px 1px 2px #000;
             box-shadow: 4px 4px 10px rgba(0,0,0,0.8), inset 2px 2px 5px rgba(255,255,255,0.05);
-            padding: 8px 15px;
-            border-radius: 2px;
+            padding: 8px 15px; border-radius: 2px;
         }
 
         #ui { position: absolute; top: 20px; left: 20px; font-size: 22px; pointer-events: none; z-index: 5;}
@@ -22,13 +19,11 @@
         
         #stamina-container { 
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            width: 300px; height: 18px; 
-            background: #1a1511; border: 4px ridge #5e4835; z-index: 5;
+            width: 300px; height: 18px; background: #1a1511; border: 4px ridge #5e4835; z-index: 5;
             box-shadow: 4px 4px 10px rgba(0,0,0,0.8), inset 0 0 10px #000;
         }
         #stamina-bar { 
-            width: 100%; height: 100%; 
-            background: linear-gradient(to bottom, #d4af37, #997a00); 
+            width: 100%; height: 100%; background: linear-gradient(to bottom, #d4af37, #997a00); 
             transition: background 0.2s, width 0.1s linear; 
         }
         
@@ -45,57 +40,110 @@
             border: 8px ridge #6b533d; border-radius: 50%; z-index: 5;
             box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.9), inset 0 0 15px #000; pointer-events: none;
         }
-        
-        /* Cinematic Fade Overlays */
+
         #fade-black {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000; z-index: 8; opacity: 0; pointer-events: none;
             transition: opacity 3s ease-in-out;
         }
 
-        .overlay { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(10, 8, 5, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; 
-        }
-
-        .overlay-box {
-            background: linear-gradient(135deg, #4a3b2c 0%, #2a2118 100%); border: 6px ridge #7b5e40;
-            padding: 40px 60px; box-shadow: 10px 10px 20px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
-            text-align: center; color: #d4c4a8; position: relative;
-        }
-
         #win-screen { 
             display: none; background: transparent; opacity: 0; 
             transition: opacity 3s ease-in-out; z-index: 9;
         }
+
+        /* --- YOUR FINAL MECHANICAL MENU STYLES --- */
+        :root {
+            --title-font: 'Courier New', monospace; 
+            --main-font: 'Courier New', monospace;
+            --clunky-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect x='12' y='12' width='8' height='12' fill='%233e2e21' stroke='%23110d0a' stroke-width='1'/%3E%3Cpath d='M16 2 L20 12 L12 12 Z' fill='%238b6b4a' stroke='%23110d0a'/%3E%3Crect x='10' y='24' width='12' height='4' rx='1' fill='%235e4835'/%3E%3Ccircle cx='16' cy='26' r='1' fill='%2300eeff'/%3E%3C/svg%3E") 16 2, auto;
+        }
+
+        /* Turned your body style into an overlay so the 3D canvas is visible behind it */
+        .overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+            display: flex; align-items: center; justify-content: center; 
+            cursor: var(--clunky-cursor); font-family: var(--main-font);
+            background-image: 
+                radial-gradient(circle at center, rgba(62, 46, 33, 0.2) 0%, #0c121a 100%),
+                repeating-linear-gradient(rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 4px);
+            backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;
+        }
+
+        .grid-container {
+            display: grid; grid-template-columns: 300px minmax(400px, 600px) 300px; gap: 25px;
+            animation: slam 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards; 
+            max-width: 1300px; width: 100%;
+        }
+
+        @keyframes screen-shake {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-4px); }
+            50% { transform: translateY(3px); }
+            75% { transform: translateY(-1px); }
+            100% { transform: translateY(0); }
+        }
+        .shake-active { animation: screen-shake 0.2s ease-in-out; }
+
+        @keyframes slam { 0% { transform: scale(1.1); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .panel {
+            background: linear-gradient(145deg, #4e3c2d, #292017); border: 3px solid #1a1511;
+            border-top: 3px solid #8b6b4a; color: #d4c4a8; padding: 25px; border-radius: 15px;
+            box-shadow: 15px 15px 35px rgba(0,0,0,0.8), inset 1px 1px 3px rgba(255,255,255,0.1);
+        }
+
+        .header-title { color: #d4af37; font-weight: bold; border-bottom: 2px solid rgba(139, 107, 74, 0.3); margin-bottom: 15px; padding-bottom: 8px; text-transform: uppercase; font-size: 1em; letter-spacing: 1px;}
+
+        .center-col { display: flex; flex-direction: column; gap: 20px; text-align: center; }
+        .center-col h1 { font-family: var(--title-font); font-size: 3.8em; margin: 0; text-shadow: 0 4px 10px #000; letter-spacing: -1px; font-weight: 900; }
+        .version { font-size: 0.8em; color: #5e4835; margin-bottom: 10px; font-weight: bold; }
         
-        button { 
-            background: linear-gradient(to bottom, #6b533d, #3e2e21); color: #e0d8c0; border: 4px outset #8b6b4a; 
-            padding: 15px 30px; font-size: 1.2em; cursor: pointer; font-family: inherit; margin-top: 25px; 
-            text-transform: uppercase; font-weight: bold; text-shadow: 1px 1px 2px #000; box-shadow: 3px 3px 8px rgba(0,0,0,0.6);
+        .lore-box { font-style: italic; background: rgba(17, 13, 10, 0.6); border-radius: 10px; border: 2px solid #3e2e21; padding: 15px; color: #d4c4a8; line-height: 1.5; }
+        
+        .input-container { position: relative; width: 100%; height: 64px; background: #0c121a; border: 3px ridge #8b6b4a; border-radius: 10px; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); overflow: hidden; }
+
+        .input-plate { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            box-sizing: border-box; background: transparent; border: none;
+            color: #00eeff; padding: 15px; font-size: 1.5em; text-align: center; 
+            outline: none; cursor: var(--clunky-cursor); font-family: var(--title-font); font-weight: 900; z-index: 2; caret-color: transparent; 
         }
-        button:hover { background: linear-gradient(to bottom, #7b634d, #4e3e31); }
-        button:active { border-style: inset; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); transform: translateY(2px); }
 
-        h1 { margin-top: 0; text-shadow: 2px 2px 4px #000; border-bottom: 2px solid #5e4835; padding-bottom: 10px;}
-        p { text-shadow: 1px 1px 2px #000; line-height: 1.5;}
-
-        /* NEW SETTINGS UI */
-        #cog-btn {
-            position: absolute; top: 15px; right: 15px; width: 40px; height: 40px;
-            background: #5e4835; border: 3px ridge #8b6b4a; color: #d4c4a8;
-            display: none; align-items: center; justify-content: center;
-            font-size: 24px; cursor: pointer; transition: transform 0.4s; z-index: 12;
+        .input-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
+            font-family: var(--title-font); font-weight: 900; font-size: 1.5em; color: rgba(0, 238, 255, 0.3); pointer-events: none; z-index: 1;
         }
-        #cog-btn:hover { transform: rotate(90deg); color: #fff; }
 
-        .switch-row { margin: 20px 0; display: flex; align-items: center; gap: 20px; font-weight: bold; justify-content: center; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border: 2px solid #5e4835; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: #d4af37; transition: .4s; }
-        input:checked + .slider { background-color: #1a4a1a; }
-        input:checked + .slider:before { transform: translateX(22px); }
+        .dots span { animation: blink 1.4s infinite both; font-size: 1.5em; }
+        .dots span:nth-child(2) { animation-delay: 0.2s; } .dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
+        
+        .hazard-wrap { background: repeating-linear-gradient(45deg, #d4af37, #d4af37 10px, #110d0a 10px, #110d0a 20px); padding: 5px; border-radius: 12px; overflow: hidden; } 
+        
+        button.menu-btn { 
+            width: 100%; background: linear-gradient(to bottom, #8b6b4a, #5e4835); color: #110d0a; 
+            border: none; border-bottom: 6px solid #3e2e21; border-radius: 8px; margin: 0;
+            padding: 22px; font-size: 1.6em; font-weight: 900; text-transform: uppercase; 
+            cursor: var(--clunky-cursor); text-shadow: 1px 1px 0 rgba(255,255,255,0.1); transition: all 0.05s;
+        }
+        button.menu-btn:hover { background: linear-gradient(to bottom, #d4af37, #8b6b4a); filter: brightness(1.1); transform: none; box-shadow: none; border-style: none; border-bottom: 6px solid #3e2e21;}
+        button.menu-btn:active { transform: translateY(6px); border-bottom: 0px solid #3e2e21; box-shadow: inset 0 5px 15px rgba(0,0,0,0.6); }
+
+        .checklist { 
+            background: #e0d8c0; color: #292017; padding: 18px; border-radius: 4px 4px 15px 15px; border-top: 8px solid #8b6b4a; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.5); 
+            animation: slow-tilt 5s ease-in-out infinite; transform-origin: top center;
+        } 
+        
+        @keyframes slow-tilt { 0% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } 100% { transform: rotate(-4deg); } }
+
+        .key { background: #110d0a; border: 2px solid #3e2e21; border-radius: 6px; padding: 6px; color: #d4af37; }
+        .setting-row { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; font-size: 0.9em; text-transform: uppercase; }
+
+        .right-col { display: flex; flex-direction: column; gap: 20px; }
+        .stat-box { background: rgba(17, 13, 10, 0.8); border: 1px solid #3e2e21; border-radius: 10px; padding: 12px; text-align: center; } 
+        .stat-val { font-size: 1.5em; color: #d4af37; display: block; margin-top: 5px; font-weight: bold; }
+        .archives { height: 160px; overflow-y: auto; background: #0c121a; border-radius: 10px; border: 2px inset #110d0a; padding: 10px; } 
     </style>
 </head>
 <body>
@@ -104,45 +152,194 @@
     <div id="stamina-container"><div id="stamina-bar"></div></div>
     <div id="crosshair"></div>
     <canvas id="radar" width="160" height="160"></canvas>
-
+    
     <div id="fade-black"></div>
 
-    <div id="instructions" class="overlay">
-        <div class="overlay-box">
-            <div id="cog-btn">⚙</div>
-            <h1 id="main-title">Vigil Remnants</h1>
-            <div id="instruction-text">
-                <p>The corridors are wide, but the paths are many.<br>Find the orbs to unlock the perimeter gate.</p>
-                <p>Check your radar for directions and <span style="color:#ff5555; font-weight:bold;">roaming threats</span>.</p>
-                <p><b>WASD</b>: Move | <b>SHIFT</b>: Sprint</p>
-            </div>
-            <button id="startBtn">ENGAGE MECHANISM</button>
-        </div>
-    </div>
-
-    <div id="settings-menu" class="overlay" style="display: none; z-index: 11;">
-        <div class="overlay-box">
-            <h1>CALIBRATION</h1>
-            <div class="switch-row">
-                <span>AI HUNTING</span>
-                <label class="switch">
-                    <input type="checkbox" id="aiToggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <button id="closeSettingsBtn">BACK TO SYSTEMS</button>
-        </div>
-    </div>
-
     <div id="win-screen" class="overlay">
-        <div class="overlay-box">
-            <h1 style="color: #77ff77;">ESCAPED</h1>
-            <p>You have breached the outer wall.</p>
+        <div class="panel" style="text-align: center; max-width: 500px;">
+            <h1 style="color: #77ff77; text-shadow: none;">ESCAPED</h1>
+            <p style="font-size: 1.2em; margin-bottom: 20px;">You have breached the outer wall.</p>
             <h2 id="finalTime">TIME: 0.0s</h2>
-            <button onclick="location.reload()">RECALIBRATE & RESTART</button>
+            <button class="menu-btn" onclick="location.reload()" style="margin-top: 20px;">RECALIBRATE & RESTART</button>
         </div>
     </div>
 
+    <div id="instructions" class="overlay">
+        <div class="grid-container" id="main-ui">
+            <div class="left-col">
+                <div class="checklist">
+                    <u style="text-decoration-thickness: 2px;">OBJECTIVES</u><br><br>
+                    [ ] EXTRACT ORBS<br>
+                    [ ] MONITOR STAMINA<br>
+                    [ ] FIND THE BREACH
+                </div>
+                <div class="panel" style="margin-top: 20px;">
+                    <div class="header-title">SETTINGS</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+                        <div></div><div class="key" style="text-align:center">W</div><div></div>
+                        <div class="key" style="text-align:center">A</div><div class="key" style="text-align:center">S</div><div class="key" style="text-align:center">D</div>
+                    </div>
+                    <div class="setting-row">AUDIO UNIT <input type="checkbox" checked></div>
+                    <div class="setting-row">SHADOW GEN <input type="checkbox" checked></div>
+                    <div class="setting-row">SENSITIVITY <input type="range" style="width: 100px;"></div>
+                </div>
+            </div>
+
+            <div class="center-col panel" style="padding: 45px;">
+                <div>
+                    <h1 id="main-title">VIGIL REMNANTS</h1>
+                    <div class="version">V1.0.4 // HYDRAULIC BUILD</div>
+                </div>
+                <div class="lore-box" id="lore-text">...LOADING LORE...</div>
+                
+                <div class="input-container">
+                    <div class="input-bg" id="input-bg-text">NAMETAG</div>
+                    <input type="text" id="name-input" class="input-plate" maxlength="15">
+                </div>
+
+                <div class="hazard-wrap">
+                    <button id="engage-btn" class="menu-btn">ENGAGE MECHANISM</button>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div class="panel">
+                    <div class="header-title">Survivor Metrics</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="stat-box">BEST<span class="stat-val">--:--</span></div>
+                        <div class="stat-box">TRY<span class="stat-val">0</span></div>
+                        <div class="stat-box" style="grid-column: span 2; color:#00eeff;">ORBS COLLECTED: <span class="stat-val" style="display:inline; margin-left:10px;">0</span></div>
+                    </div>
+                </div>
+                <div class="panel" style="margin-top: 20px;">
+                    <div class="header-title">Records Archive</div>
+                    <div class="archives">
+                        <div style="color: #3e2e21; text-align: center; margin-top: 45px; font-weight: bold; font-size: 0.8em;">NO ARCHIVES FOUND</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+        // Note: The audio context here is specifically for your menu UI sounds
+        const menuAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const soundLibrary = {};
+
+        // 1. ASSET LOADER
+        async function initSounds() {
+            const files = {
+                clack: 'type_sound.wav',      
+                engage: 'impact.wav',         
+                ambient: 'background.wav'     
+            };
+
+            for (const [name, path] of Object.entries(files)) {
+                try {
+                    const response = await fetch(path);
+                    const arrayBuffer = await response.arrayBuffer();
+                    soundLibrary[name] = await menuAudioCtx.decodeAudioData(arrayBuffer);
+                } catch(e) { console.log("Sound file not found: " + path); }
+            }
+        }
+        initSounds();
+
+        // 2. REFINED PLAY FUNCTION
+        function play(name, options = { loop: false, volume: 1, fadeIn: 0 }) {
+            if (!soundLibrary[name]) return null;
+
+            const source = menuAudioCtx.createBufferSource();
+            source.buffer = soundLibrary[name];
+            source.loop = options.loop;
+
+            const gainNode = menuAudioCtx.createGain();
+            if (options.fadeIn > 0) {
+                gainNode.gain.setValueAtTime(0.001, menuAudioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(options.volume, menuAudioCtx.currentTime + options.fadeIn);
+            } else {
+                gainNode.gain.setValueAtTime(options.volume, menuAudioCtx.currentTime);
+            }
+
+            source.connect(gainNode);
+            gainNode.connect(menuAudioCtx.destination);
+            source.start(0);
+            return { source, gainNode };
+        }
+
+        // --- Interaction Logic ---
+        const nameInput = document.getElementById('name-input');
+        const bgText = document.getElementById('input-bg-text');
+        const uiContainer = document.getElementById('main-ui');
+        const engageBtn = document.getElementById('engage-btn');
+
+        let bgMusic = null;
+
+        engageBtn.addEventListener('mousedown', () => {
+            // Start Music with 3s Fade-In on first click
+            if (!bgMusic) {
+                bgMusic = play('ambient', { loop: true, volume: 0.5, fadeIn: 3 });
+            }
+            
+            play('engage', { volume: 1.2 });
+            uiContainer.classList.remove('shake-active');
+            void uiContainer.offsetWidth; 
+            uiContainer.classList.add('shake-active');
+
+            // --- THE ONLY ADDITION: This triggers the 3D Game ---
+            document.body.requestPointerLock();
+        });
+
+        nameInput.addEventListener('input', () => {
+            play('clack', { volume: 1.2 }); // 2x Loud Typing Tone
+            if (nameInput.value.length > 0) {
+                bgText.style.opacity = "0";
+            } else {
+                bgText.style.opacity = "1";
+                bgText.innerHTML = '<div class="dots"><span>.</span><span>.</span><span>.</span></div>';
+            }
+        });
+
+        nameInput.addEventListener('focus', () => {
+            if (nameInput.value === "") {
+                bgText.innerHTML = '<div class="dots"><span>.</span><span>.</span><span>.</span></div>';
+            }
+        });
+
+        const quotes = ["The corridors are wide, but the paths are many.", "Do not trust the geometry.", "Cyan light is a guide."];
+        document.getElementById('lore-text').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+    </script>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- Game State Variables ---
+        let gameActive = false;
+        let gameWon = false;
+        let startTime = 0;
+        let totalElapsed = 0;
+        let totalOrbs = 10;
+        let orbsCollected = 0;
+        
+        document.getElementById('totalOrbsUI').innerText = totalOrbs;
+
+        const player = {
+            height: 2.1, speed: 0.2, runSpeed: 0.4,
+            stamina: 100, maxStamina: 100, isExhausted: false,
+            radius: 0.8,
+            headBobTimer: 0
+        };
+
+        const keys = { w: false, a: false, s: false, d: false, shift: false };
+        let yaw = Math.PI;
+        let pitch = 0;
+        const SENSITIVITY = 0.002;
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
@@ -437,15 +634,15 @@
                 enemy.userData = { targetPos: new THREE.Vector3(ePos.x, 2.0, ePos.z), lastGrid: {x: eCell.x, z: eCell.z} }; scene.add(enemy); enemies.push(enemy);
             }
         }
-// --- Input ---
-        const overlay = document.getElementById('instructions'); const startBtn = document.getElementById('startBtn');
-        const cogBtn = document.getElementById('cog-btn');
+    // --- Input ---
+const overlay = document.getElementById('instructions'); 
+// This points the variable to your new "ENGAGE" button ID
+const startBtn = document.getElementById('engage-btn'); 
+const cogBtn = document.getElementById('cog-btn');
         const settingsMenu = document.getElementById('settings-menu');
-        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-        const aiToggle = document.getElementById('aiToggle');
+const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 
-        startBtn.addEventListener('click', () => document.body.requestPointerLock());
-
+   startBtn.addEventListener('click', () => document.body.requestPointerLock());
         // UI Listeners for Calibration Menu
         cogBtn.onclick = (e) => {
             e.stopPropagation();
