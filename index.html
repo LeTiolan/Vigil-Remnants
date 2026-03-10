@@ -259,6 +259,7 @@
     </script>
 
     <script type="module">
+        window.alert = function() {}; // This disables all pop-up alerts in the game
         import * as THREE from 'three';
 
         // --- Maze Generation ---
@@ -756,24 +757,7 @@
                     document.getElementById('time-stat').innerText = totalElapsed + 's';
                     document.getElementById('orb-stat').innerText = `${orbsCollected} / 12`
                     
-                    // Show the Prototype Screen
-                    document.getElementById('death-screen-container').style.setProperty('display', 'flex', 'important');
-                }
-            });
-
-            if (!gameWon && closestDist < 12) { camera.position.x += (Math.random() - 0.5) * ((12 - closestDist) * 0.02); if (!hasPlayedSting) { playSting(); hasPlayedSting = true; } } else { hasPlayedSting = false; }
-
-            orbs.forEach(orb => {
-                if (!gameWon && orb.position.y > 0 && camera.position.distanceTo(orb.position) < 3) {
-                    orb.position.y = -1000; orbsCollected++; document.getElementById('orbCount').innerText = orbsCollected;
-                    if(orbsCollected === totalOrbs && doorState === 'closed') {
-                        doorState = 'valves_pressure'; initIndustrialAudio();
-                        sirens.forEach(s => s.light.intensity = 50);
-                        klaxonGain.gain.setTargetAtTime(0.015, audioCtx.currentTime, 0.1); hissGain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.1);
-                    }
-                }
-            });
-
+                 
             // --- Multi-Stage Cinematic Animation ---
             if (!gameWon) camera.rotation.z = 0; 
             if (doorState !== 'closed' && doorState !== 'open') {
