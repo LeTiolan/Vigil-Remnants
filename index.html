@@ -107,6 +107,59 @@
 
         #win-screen { display: none; background: rgba(10, 8, 5, 0.85); position: absolute; top: 0; left: 0; width: 100%; height: 100%; align-items: center; justify-content: center; opacity: 0; transition: opacity 3s ease-in-out; z-index: 110; flex-direction: column;}
         .overlay-box { background: linear-gradient(135deg, #4a3b2c 0%, #2a2118 100%); border: 6px ridge #7b5e40; padding: 40px 60px; text-align: center; color: #d4c4a8;}
+        /* --- DEATH SCREEN UI --- */
+        #death-screen { 
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: #050101; color: #cc0000; font-family: 'Courier New', monospace; 
+            z-index: 200; align-items: center; justify-content: center; flex-direction: column;
+            cursor: crosshair;
+        }
+        #death-screen .void-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #260505 0%, #030000 100%);
+            animation: pulse-bg 6s infinite alternate ease-in-out; z-index: 0;
+        }
+        @keyframes pulse-bg { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.05); opacity: 1; } }
+        #death-screen .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 10; box-shadow: inset 0 0 120px rgba(0,0,0,0.95);
+        }
+        #death-screen .death-container { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+        #death-screen h1 { 
+            font-size: 6em; margin: 0 0 15px 0; letter-spacing: -2px; text-align: center;
+            text-shadow: 4px 4px 20px rgba(255, 0, 0, 0.8), -2px -2px 10px rgba(100, 0, 0, 0.8); 
+            animation: power-flicker 3s infinite; font-weight: 900; color: #ff1a1a;
+        }
+        @keyframes power-flicker {
+            0%, 19.9%, 22%, 62.9%, 64%, 64.9%, 66%, 100% { opacity: 1; color: #ff1a1a; transform: translate(0, 0); text-shadow: 4px 4px 20px rgba(255, 0, 0, 0.8), -2px -2px 10px rgba(100, 0, 0, 0.8); }
+            20%, 21.9% { opacity: 0.3; color: #4a0000; transform: translate(-2px, 1px); text-shadow: none; }
+            63%, 63.9% { opacity: 0.5; color: #6a0000; transform: translate(2px, -1px); text-shadow: none; }
+            65%, 65.9% { opacity: 0.2; color: #3a0000; transform: translate(-1px, 2px); text-shadow: none; }
+        }
+        #death-screen .corrupted-panel {
+            background: linear-gradient(145deg, #2e0b0b, #110202); border: 3px solid #1a0505; border-top: 4px solid #730a0a;
+            padding: 35px 45px; border-radius: 12px; width: 450px; box-shadow: 0 25px 50px rgba(0,0,0,0.95), inset 0px 0px 20px rgba(255,0,0,0.05); position: relative;
+        }
+        #death-screen .corrupted-panel::before {
+            content: ''; position: absolute; top: -4px; left: 10%; width: 80%; height: 4px;
+            background: repeating-linear-gradient(90deg, #aa0000, #aa0000 10px, #440000 10px, #440000 20px); border-radius: 4px 4px 0 0; opacity: 0.6;
+        }
+        #death-screen .post-mortem-box {
+            background: rgba(15, 3, 3, 0.9); padding: 25px; border-radius: 4px 4px 15px 15px; border-top: 6px solid #660505; 
+            box-shadow: 0 15px 25px rgba(0,0,0,0.8), inset 0 0 12px rgba(80,0,0,0.4); animation: death-tilt 7s ease-in-out infinite; transform-origin: top center;
+            margin-bottom: 35px; border-left: 1px solid #2a0000; border-right: 1px solid #2a0000; border-bottom: 1px solid #2a0000;
+        }
+        @keyframes death-tilt { 0% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } 100% { transform: rotate(-2deg); } }
+        #death-screen .header-title { color: #ff3333; font-weight: bold; border-bottom: 2px dashed rgba(200, 0, 0, 0.4); margin-bottom: 20px; padding-bottom: 10px; text-transform: uppercase; font-size: 1.1em; letter-spacing: 2px; text-align: center; }
+        #death-screen .setting-row { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; font-size: 0.95em; font-weight: bold; color: #aa4444; text-transform: uppercase; }
+        #death-screen .stat-val { font-size: 1.4em; color: #ffcccc; text-shadow: 0 0 8px rgba(255,50,50,0.6); font-weight: 900; }
+        #death-screen button {
+            width: 100%; background: linear-gradient(to bottom, #7a0000, #400000); color: #0a0000; border: 2px solid #1a0000; border-bottom: 6px solid #220000; border-radius: 8px;
+            padding: 20px; font-size: 1.5em; font-weight: 900; text-transform: uppercase; cursor: crosshair; text-shadow: 1px 1px 0 rgba(255,100,100,0.2); transition: all 0.1s ease; letter-spacing: 1px;
+        }
+        #death-screen button:hover { background: linear-gradient(to bottom, #990000, #550000); box-shadow: 0 0 15px rgba(255,0,0,0.4); }
+        #death-screen button:active { transform: translateY(6px); border-bottom: 0px solid #220000; box-shadow: inset 0 6px 15px rgba(0,0,0,0.8); }
     </style>
 </head>
 <body>
@@ -180,6 +233,22 @@
             <p>You have breached the outer wall.</p>
             <h2 id="finalTime">TIME: 0.0s</h2>
             <button onclick="location.reload()">RECALIBRATE & RESTART</button>
+        </div>
+    </div>
+    <div id="death-screen">
+        <div class="void-bg"></div>
+        <div class="scanlines"></div>
+        <div class="death-container">
+            <h1>SIGNAL LOST</h1>
+            <div class="corrupted-panel">
+                <div class="post-mortem-box">
+                    <div class="header-title">Post-Mortem Metrics</div>
+                    <div class="setting-row">TIME SURVIVED <span class="stat-val" id="death-time-stat">00:00</span></div>
+                    <div class="setting-row">ORBS EXTRACTED <span class="stat-val" id="death-orb-stat">0 / 4</span></div>
+                    <div class="setting-row" style="margin-bottom: 0;">CAUSE OF DEATH <span class="stat-val" style="font-size:1em; color:#ff3333;" id="death-cause">PHANTOM</span></div>
+                </div>
+                <button id="reboot-btn">INITIATE REBOOT</button>
+            </div>
         </div>
     </div>
 
@@ -666,11 +735,38 @@
                     enemy.userData.lastGrid = {x: cx, z: cz}; let nextCell = neighbors.length > 0 ? neighbors[Math.floor(Math.random() * neighbors.length)] : enemy.userData.lastGrid;
                     enemy.userData.targetPos.set(getPos(nextCell.x, nextCell.z).x, 2.0, getPos(nextCell.x, nextCell.z).z);
                 }
-                const dir = new THREE.Vector3().subVectors(enemy.userData.targetPos, enemy.position).normalize(); enemy.position.addScaledVector(dir, 0.12); enemy.position.y = 2.0 + Math.sin(now * 0.003 + index) * 0.4;
-                const dist = camera.position.distanceTo(enemy.position); if (dist < closestDist) closestDist = dist;
+               // Keep phantoms moving
+                const dir = new THREE.Vector3().subVectors(enemy.userData.targetPos, enemy.position).normalize(); 
+                enemy.position.addScaledVector(dir, 0.12); 
+                enemy.position.y = 2.0 + Math.sin(now * 0.003 + index) * 0.4;
                 
-                if (!gameWon && dist < 3.0) { document.exitPointerLock(); alert("A PHANTOM CAUGHT YOU."); location.reload(); }
-            });
+                const dist = camera.position.distanceTo(enemy.position); 
+                if (dist < closestDist) closestDist = dist;
+                
+                // --- THE UPGRADED DEATH TRIGGER ---
+                // We add "&& gameActive" to ensure this only fires ONCE
+                if (!gameWon && dist < 3.0 && gameActive) { 
+                    gameActive = false; // Freezes player and game timer
+                    document.exitPointerLock(); 
+                    
+                    // Hide the standard HUD (Orbs, Timer, etc.)
+                    document.getElementById('ui').style.display = 'none';
+                    document.getElementById('timer-ui').style.display = 'none';
+                    document.getElementById('stamina-container').style.display = 'none';
+                    document.getElementById('radar').style.display = 'none';
+                    
+                    // Calculate Final Stats for the screen
+                    let currentAliveTime = Math.floor(accumulatedTime + ((Date.now() - startTime) / 1000));
+                    let mins = Math.floor(currentAliveTime / 60).toString().padStart(2, '0');
+                    let secs = (currentAliveTime % 60).toString().padStart(2, '0');
+                    
+                    // Push data to the Death Screen elements
+                    document.getElementById('death-time-stat').innerText = `${mins}:${secs}`;
+                    document.getElementById('death-orb-stat').innerText = `${orbsCollected} / 12`;
+                    
+                    // Reveal the Death Screen
+                    document.getElementById('death-screen').style.display = 'flex';
+                }
 
             if (!gameWon && closestDist < 12) { camera.position.x += (Math.random() - 0.5) * ((12 - closestDist) * 0.02); if (!hasPlayedSting) { playSting(); hasPlayedSting = true; } } else { hasPlayedSting = false; }
 
@@ -783,6 +879,10 @@
 
         function animate() { requestAnimationFrame(animate); update(); renderer.render(scene, camera); } animate();
         window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            // Reboot Button Logic
+        document.getElementById('reboot-btn').addEventListener('click', () => {
+            location.reload(); 
+        });
     </script>
 </body>
 </html>
