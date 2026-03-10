@@ -754,13 +754,11 @@
                     // Set the Stats on your Prototype V3 screen
                     const totalElapsed = (accumulatedTime + (Date.now() - startTime) / 1000).toFixed(1);
                     document.getElementById('time-stat').innerText = totalElapsed + 's';
-                    document.getElementById('orb-stat').innerText = `${orbsCollected} / 12`;
+                    document.getElementById('orb-stat').innerText = `${orbsCollected} / 12`
                     
                     // Show the Prototype Screen
                     document.getElementById('death-screen-container').style.setProperty('display', 'flex', 'important');
                 }
-                
-                if (!gameWon && dist < 3.0) { document.exitPointerLock(); alert("A PHANTOM CAUGHT YOU."); location.reload(); }
             });
 
             if (!gameWon && closestDist < 12) { camera.position.x += (Math.random() - 0.5) * ((12 - closestDist) * 0.02); if (!hasPlayedSting) { playSting(); hasPlayedSting = true; } } else { hasPlayedSting = false; }
