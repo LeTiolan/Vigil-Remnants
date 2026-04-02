@@ -1,4 +1,4 @@
- <style>
+
         body { margin: 0; overflow: hidden; background-color: #0c121a; font-family: 'Courier New', Courier, monospace; }
         
         .clunky-panel {
@@ -192,4 +192,3 @@
         }
         #death-screen-ui button:hover { background: linear-gradient(to bottom, #990000, #550000); box-shadow: 0 0 15px rgba(255,0,0,0.4); }
         #death-screen-ui button:active { transform: translateY(6px); border-bottom: 0px solid #220000; box-shadow: inset 0 6px 15px rgba(0,0,0,0.8); }
-    </style>
