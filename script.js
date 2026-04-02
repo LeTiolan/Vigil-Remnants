@@ -1,4 +1,4 @@
-  <script type="module">
+
         import * as THREE from 'three';
 
         // --- Maze Generation ---
@@ -618,4 +618,3 @@
             deathUI.style.opacity = '0';
             setTimeout(() => { location.reload(); }, 500);
         });
-    </script>
